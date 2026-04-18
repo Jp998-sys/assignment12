@@ -19,9 +19,14 @@ This project builds on the earlier modules by adding user registration and login
 - GitHub Actions for automated testing and deployment
 - Docker Hub image deployment
 
+
+## Docker Hub repo link
+https://hub.docker.com/repository/docker/jp998/assignment12/general 
+
 ## How to run locally
 Create and activate a virtual environment:
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
+
