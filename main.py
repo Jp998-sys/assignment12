@@ -1,6 +1,9 @@
 # main.py
 
 from fastapi import FastAPI, HTTPException, Request
+from app.routes.users import router as users_router
+from app.routes.calculations import router as calculations_router
+from app.database import Base, engine
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, field_validator  # Use @validator for Pydantic 1.x
@@ -14,6 +17,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
+
+app.include_router(users_router, prefix="/users", tags=["Users"])
+app.include_router(calculations_router, prefix="/calculations", tags=["Calculations"])
 
 # Setup templates directory
 templates = Jinja2Templates(directory="templates")
