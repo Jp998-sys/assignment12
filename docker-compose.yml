@@ -21,7 +21,7 @@ services:
 
   # Service: db (PostgreSQL)
   db:
-    image: postgres
+    image: postgres:17
     container_name: postgres_db
     environment:
       POSTGRES_USER: postgres
