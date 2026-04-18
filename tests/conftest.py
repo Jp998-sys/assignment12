@@ -9,16 +9,14 @@ from sqlalchemy.orm import Session
 
 from app.database import Base, get_engine, get_sessionmaker
 from app.models.user import User
-from app.config import settings
-from app.database_init import init_db, drop_db
-
+from app.core.config import settings
+from app.auth.security import hash_password
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
 
 fake = Faker()
 Faker.seed(12345)
@@ -33,12 +31,12 @@ def create_fake_user() -> Dict[str, str]:
     return {
         "username": fake.unique.user_name(),
         "email": fake.unique.email(),
-        "password_hash": User.hash_password("SecurePass123!")
+        "password_hash": hash_password("SecurePass123!")
     }
 
 
 @pytest.fixture(scope="session", autouse=True)
-def setup_test_database(request):
+def setup_test_database():
     logger.info("Setting up test database...")
 
     Base.metadata.drop_all(bind=test_engine)
@@ -47,18 +45,12 @@ def setup_test_database(request):
     Base.metadata.create_all(bind=test_engine)
     logger.info("Created all tables based on models.")
 
-    init_db()
-    logger.info("Initialized the test database with initial data.")
-
     yield
 
-    preserve_db = request.config.getoption("--preserve-db")
-    if preserve_db:
-        logger.info("Skipping drop_db due to --preserve-db flag.")
-    else:
-        logger.info("Cleaning up test database...")
-        drop_db()
-        logger.info("Dropped test database tables.")
+    logger.info("Cleaning up test database...")
+    Base.metadata.drop_all(bind=test_engine)
+    logger.info("Dropped test database tables.")
+
 
 @pytest.fixture
 def db_session(request) -> Generator[Session, None, None]:
@@ -78,6 +70,7 @@ def db_session(request) -> Generator[Session, None, None]:
 def fake_user_data() -> Dict[str, str]:
     return create_fake_user()
 
+
 @pytest.fixture
 def test_user(db_session: Session) -> User:
     user_data = create_fake_user()
@@ -86,6 +79,7 @@ def test_user(db_session: Session) -> User:
     db_session.commit()
     db_session.refresh(user)
     return user
+
 
 @pytest.fixture
 def seed_users(db_session: Session, request) -> List[User]:
@@ -103,6 +97,7 @@ def seed_users(db_session: Session, request) -> List[User]:
 
     db_session.commit()
     return users
+
 
 def pytest_addoption(parser):
     parser.addoption(
