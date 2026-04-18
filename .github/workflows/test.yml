@@ -101,6 +101,6 @@ jobs:
           context: .
           push: true
           tags: |
-            jp998/assignment11:latest
-            jp998/assignment11:${{ github.sha }}
+            jp998/assignment12:latest
+            jp998/assignment12:${{ github.sha }}
           platforms: linux/amd64
